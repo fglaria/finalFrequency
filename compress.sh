@@ -1,16 +1,19 @@
 #! /bin/bash
+# set -x
 
-#$cliqueFolder = $1
-
-for clique in $1/*
-do
-	echo $clique;
-	IFS='/' read -ra pathArray <<< "$clique"
-	#echo ${pathArray[-1]}
-	#$fileName = ${pathArray[-1]}
-	./compress $2/${pathArray[-1]} > $clique.clog 2> $clique.cerror
-	mv $clique.* ../compressed/.
-	mv $2/*.sdsl ../compressed/.
-	#break
+while getopts "i:c" option; do
+    case $option in
+        i)
+            route=$OPTARG
+            ;;
+        c) 
+            g++ -std=c++11 compress.cpp -o compress -I ~/include -L ~/lib -lsdsl -ldivsufsort -ldivsufsort64 -O3 -DNDEBUG
+            ;;
+    esac
 done
 
+if [[ $route ]]; then
+    ./compress $route > $route.log 2> $route.error
+else
+    echo "No path to file to compress"
+fi

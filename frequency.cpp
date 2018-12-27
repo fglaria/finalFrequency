@@ -1,4 +1,4 @@
-// g++ -std=c++11 popular.cpp -o popular -I ~/include -L ~/lib -lsdsl -ldivsufsort -ldivsufsort64 -O3 -DNDEBUG
+// g++ -std=c++11 frequency.cpp -o frequency -O3 -DNDEBUG
 
 #include <iostream>
 #include <unordered_set>
