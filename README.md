@@ -12,6 +12,7 @@ As an option, it can be called with *-c* to compile it's corresponding *.cpp* fi
 **If it hasn't been called before, you should include this option.**
 
 The output of this script are new created files with same name as input clique file, but with extensions:
+
 - **.X**: Sequence of numbered nodes on partitions.
 - **.B1**: Bitmaps pointing with 1 where a partitions begins.
 - **.B2**: Sequence of bytes representing bitmaps showing on wich cliques a node could be.
