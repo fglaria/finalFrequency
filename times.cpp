@@ -115,7 +115,7 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
         //     //     // If not the same node
         //     //     if(xIndex != xI)
         //     //     {
-                    
+
         //     //     }
         //     // }
         // }
@@ -136,13 +136,13 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
     sdsl::rrr_vector<63>::rank_1_type b1_rank(&b1_rrr);
     sdsl::rrr_vector<63>::select_1_type b1_select(&b1_rrr);
 
-    std::vector<uint8_t> b2RAM;
+    std::vector<uint8_t> b2RAM(b2_wt.size(), 0);
     for(uint64_t i = 0; i < b2_wt.size(); ++i)
     {
         b2RAM[i] = b2_wt[i];
     }
 
-    std::vector<uint32_t> yRAM;
+    std::vector<uint32_t> yRAM(y_wm.size(), 0);
     for(uint64_t i = 0; i < y_wm.size(); ++i)
     {
         yRAM[i] = y_wm[i];
