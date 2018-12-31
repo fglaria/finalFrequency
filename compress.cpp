@@ -28,7 +28,7 @@ uint32_t compressInt(std::string filename) {
     return bitSize;
 }
 
-uint32_t compressByte(std::string filename) {
+uint32_t compressByte(std::string filename, std::string type) {
     // sdsl::wt_int<sdsl::rrr_vector<63>> wt_int;
     // sdsl::construct(wt_int, filename.c_str(), 1);
     // store_to_file(wt_int, filename + "-wt_int.sdsl");
@@ -42,25 +42,42 @@ uint32_t compressByte(std::string filename) {
     // store_to_file(wt_huff, filename + "-wt_huff.sdsl");
     std::cout << filename << " size ";
 
-    sdsl::wt_hutu<sdsl::rrr_vector<63>> wt_hutu;
-    sdsl::construct(wt_hutu, filename.c_str(), 1);
-    store_to_file(wt_hutu, filename + "-wt_hutu.sdsl");
+    if("hutu" == type)
+    {
+        sdsl::wt_hutu<sdsl::rrr_vector<63>> wt_hutu;
+        sdsl::construct(wt_hutu, filename.c_str(), 1);
+        store_to_file(wt_hutu, filename + "-wt_hutu.sdsl");
 
-    sdsl::wt_huff<sdsl::rrr_vector<63>> wt_huff;
-    sdsl::construct(wt_huff, filename.c_str(), 1);
-    store_to_file(wt_huff, filename + "-wt_huff.sdsl");
+        const uint32_t bitSize = size_in_bytes(wt_hutu)*8;
+        std::cout << bitSize << " bits" << std::endl;
+    }
+    else if("huff" == type)
+    {
+        sdsl::wt_huff<sdsl::rrr_vector<63>> wt_huff;
+        sdsl::construct(wt_huff, filename.c_str(), 1);
+        store_to_file(wt_huff, filename + "-wt_huff.sdsl");
 
-    sdsl::wt_blcd<sdsl::rrr_vector<63>> wt_blcd;
-    sdsl::construct(wt_blcd, filename.c_str(), 1);
-    store_to_file(wt_blcd, filename + "-wt_blcd.sdsl");
-    
+        const uint32_t bitSize = size_in_bytes(wt_huff)*8;
+        std::cout << bitSize << " bits" << std::endl;
+    }
+    else if("blcd" == type)
+    {
+        sdsl::wt_blcd<sdsl::rrr_vector<63>> wt_blcd;
+        sdsl::construct(wt_blcd, filename.c_str(), 1);
+        store_to_file(wt_blcd, filename + "-wt_blcd.sdsl");
 
-    const uint32_t bitSize = size_in_bytes(wt_hutu)*8;
-    std::cout << bitSize << " bits" << std::endl;
+        const uint32_t bitSize = size_in_bytes(wt_blcd)*8;
+        std::cout << bitSize << " bits" << std::endl;
+    }
+    else
+    {
+        std::cerr << "Byte unknown type: " << type << std::endl;
+    }
+
     return bitSize;
 }
 
-uint32_t compressBitmap(std::string filename) {
+uint32_t compressBitmap(std::string filename, std::string type) {
 
     std::ifstream Bfile (filename.c_str());
 
@@ -96,14 +113,26 @@ uint32_t compressBitmap(std::string filename) {
 
     std::cout << filename << " size ";
 
-    sdsl::rrr_vector<63> rrrb(B);
-    store_to_file(rrrb, filename + "-rrr-64.sdsl");
+    if("rrr" == type)
+    {
+        sdsl::rrr_vector<63> rrrb(B);
+        store_to_file(rrrb, filename + "-rrr-64.sdsl");
 
-    const uint32_t bitSize = size_in_bytes(rrrb)*8;
-    std::cout << bitSize << " bits" << std::endl;
+        const uint32_t bitSize = size_in_bytes(rrrb)*8;
+        std::cout << bitSize << " bits" << std::endl;
+    }
+    else if("sdb" == type)
+    {
+        sdsl::sd_vector<> sdb(B);
+        store_to_file(sdb, filename + "-sdb.sdsl");
 
-    sdsl::sd_vector<> sdb(B);
-    store_to_file(sdb, filename + "-sdb.sdsl");
+        const uint32_t bitSize = size_in_bytes(sdb)*8;
+        std::cout << bitSize << " bits" << std::endl;
+    }
+    else
+    {
+        std::cerr << "Bitmap unknown type: " << type << std::endl;
+    }
 
     return bitSize;
 }
@@ -111,9 +140,9 @@ uint32_t compressBitmap(std::string filename) {
 
 int main(int argc, char const *argv[])
 {
-    if(2 > argc)
+    if(4 > argc)
     {
-        std::cerr << "Modo de uso: " << argv[0] << " RUTA" << std::endl;
+        std::cerr << "Modo de uso: " << argv[0] << " RUTA B1_type(rrr|sdb) B2_type(hutu|huff|blcd)" << std::endl;
         return -1;
     }
 
@@ -122,45 +151,62 @@ int main(int argc, char const *argv[])
     const std::string path(argv[1]);
     std::cout << path << std::endl;
 
+    const std::string b1Type(argv[2]);
+    const std::string b2Type(argv[3]);
+
+    if("rrr" != b1Type && "sbd" != b1Type)
+    {
+        std::cerr << "Tipo de compresión a B1 inválido (rrr|sdb): " << b1Type << std::endl;
+        return -1;
+    }
+
+    if("hutu" != b2Type && "huff" != b2Type && "blcd" != b2Type)
+    {
+        std::cerr << "Tipo de compresión a B2 inválido (hutu|huff|blcd): " << b2Type << std::endl;
+        return -1;
+    }
+
     std::string sXbin = path+".X.bin";
     std::string sB1 = path+".B1";
     // std::string sB1 = path + ".B";
     std::string sB2bin = path+".B2.bin";
     std::string sYbin = path+".Y.bin";
-    std::string sB3 = path+".B3";
+    //std::string sB3 = path+".B3";
 
-    uint32_t totalSizeY = 0, totalSizeB3 = 0;
+    uint32_t totalSizeY = 0;//, totalSizeB3 = 0;
 
     totalSizeY += compressInt(sXbin);
     // std::cout << "X Done" << std::endl;
 
-    totalSizeY += compressBitmap(sB1);
+    totalSizeY += compressBitmap(sB1, b1Type);
     // std::cout << "B1 Done" << std::endl;
 
-    totalSizeY += compressByte(sB2bin);
+    totalSizeY += compressByte(sB2bin. b2Type);
     // std::cout << "B2 Done" << std::endl;
 
-    totalSizeB3 = totalSizeY;
+    //totalSizeB3 = totalSizeY;
 
     totalSizeY += compressInt(sYbin);
     // std::cout << "Y Done" << std::endl;
 
-    totalSizeB3 += compressBitmap(sB3);
+    //totalSizeB3 += compressBitmap(sB3);
     // std::cout << "B3 Done" << std::endl;
 
 
-    std::cout << "total size [bits]" << std::endl; 
+    std::cout << "total size [bits]" << std::endl;
     std::cout << "Y " << totalSizeY << std::endl;
-    std::cout << "B3 " << totalSizeB3 << std::endl;
+    //std::cout << "B3 " << totalSizeB3 << std::endl;
 
     std::cout << std::endl;
 
 
+    /*
     if(3 == argc)
     {
         std::cout << "BPE Y" << totalSizeY/atof(argv[2]) << std::endl;
         std::cout << "BPE B3" << totalSizeB3/atof(argv[2]) << std::endl;
     }
+    */
 
     return 0;
 }
