@@ -64,34 +64,26 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
         const uint32_t howManyNodesInPartition = nextPartitionIndex - partitionIndex;
         std::cerr <<  "hMB " << howManyNodesInPartition << " ";
 
-        // for(uint64_t i = 0; i < yRAM.size(); ++i)
-        // {
-        //     // yRAM[i] = y_wm[i];
-        //     // std::cerr << yRAM[i] << " ";
-        // }
-        // std::cerr << std::endl;
-        // Partition number starts at 1, not 0
         const uint32_t current_Y = yRAM[partitionNumber];
-        std::cerr <<  "cY " ;
-        std::cerr << current_Y << " ";
+        std::cerr <<  "cY " << current_Y << " ";
 
-        // const uint32_t bytesPerNode = (yRAM[partitionNumber] - current_Y)/howManyNodesInPartition;
-        // std::cerr << bytesPerNode << " ";
+        const uint32_t bytesPerNode = (yRAM[partitionNumber] - current_Y)/howManyNodesInPartition;
+        std::cerr << "bpn " << bytesPerNode << " ";
 
-        // // If no bytes per node, all nodes are adjacent
-        // if(0 == bytesPerNode)
-        // {
-        //     for (uint64_t xI = partitionIndex; xI < nextPartitionIndex; ++xI)
-        //     {
-        //         if(xIndex != xI)
-        //         {
-        //             const uint64_t adjacentNode = x_wm[xI];
+        // If no bytes per node, all nodes are adjacent
+        if(0 == bytesPerNode)
+        {
+            for (uint64_t xI = partitionIndex; xI < nextPartitionIndex; ++xI)
+            {
+                if(xIndex != xI)
+                {
+                    const uint64_t adjacentNode = x_wm[xI];
 
-        //             graph[current_node].insert(adjacentNode);
-        //             graph[adjacentNode].insert(current_node);
-        //         }
-        //     }
-        // }
+                    graph[current_node].insert(adjacentNode);
+                    graph[adjacentNode].insert(current_node);
+                }
+            }
+        }
         // else
         // {
         //     const uint64_t currentByteIndex = current_Y + bytesPerNode * (xIndex - partitionIndex);
@@ -120,7 +112,7 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
         //     // }
         // }
 
-        // std::cerr << std::endl;
+        std::cerr << std::endl;
     }
     // std::cerr << std::endl;
 

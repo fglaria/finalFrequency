@@ -6,12 +6,12 @@ while getopts "i:n:r:c" option; do
         i)
             route=$OPTARG
             ;;
-	n)
-	    nodes=$OPTARG
-	    ;;
-	r)
-	    random=$OPTARG
-	    ;;
+        n)
+            nodes=$OPTARG
+            ;;
+        r)
+            random=$OPTARG
+            ;;
         c) 
             g++ -std=c++11 times.cpp -o times -I ~/include -L ~/lib -lsdsl -ldivsufsort -ldivsufsort64 -O3 -DNDEBUG
             ;;
@@ -25,5 +25,6 @@ elif [ -z "$nodes" ]; then
 elif [ -z "$random" ]; then
     echo "No random specified"
 else
-    ./times $route $nodes $random > $route.log 2> $route.error
+    # ./times $route $nodes $random > $route.log 2> $route.error
+    ./times $route $nodes $random 
 fi
