@@ -4,4 +4,6 @@ times
 .DS_Store
 test/dblp/dblp-2011.cliques.*
 test/deci/deci.clique.*
+test/mini/mini.clique.*
+test/small/small.clique.*
 
