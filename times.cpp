@@ -43,16 +43,14 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
 {
     const uint32_t howManyX = x_wm.rank(x_wm.size(), current_node);
 
-    // std::cerr << current_node << " ";
     for (uint32_t xCount = 1; xCount <= howManyX; ++xCount)
     {
-        // std::cerr << current_node << " ";
+        std::cerr << "N" << current_node << " ";
 
-        const uint64_t xIndex = x_wm.select(1, current_node);
-        // std::cerr << xIndex << " ";
+        const uint64_t xIndex = x_wm.select(xCount, current_node);
+        std::cerr << "nI" << xIndex << " ";
 
-        uint64_t partitionNumber = b1_rank(xIndex);
-        // partitionNumber = 0 == partitionNumber ? 1 : partitionNumber;
+        uint64_t partitionNumber = b1_rank(xIndex + 1) - 1;
         std::cerr << "pN " << partitionNumber << " ";
 
         const uint64_t partitionIndex = b1_select(partitionNumber + 1);
@@ -67,7 +65,7 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
         const uint32_t current_Y = yRAM[partitionNumber];
         std::cerr <<  "cY " << current_Y << " ";
 
-        const uint32_t bytesPerNode = (yRAM[partitionNumber] - current_Y)/howManyNodesInPartition;
+        const uint32_t bytesPerNode = (yRAM[partitionNumber + 1] - current_Y)/howManyNodesInPartition;
         std::cerr << "bpn " << bytesPerNode << " ";
 
         // If no bytes per node, all nodes are adjacent
@@ -84,33 +82,60 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
                 }
             }
         }
-        // else
-        // {
-        //     const uint64_t currentByteIndex = current_Y + bytesPerNode * (xIndex - partitionIndex);
-        //     std::cerr << currentByteIndex << " ";
+        else
+        {
+            const uint64_t currentByteIndex = current_Y + bytesPerNode * (xIndex - partitionIndex);
+            std::cerr << "cBi " << currentByteIndex << " ";
 
-        //     // uint8_t current_bytes[bytesPerNode];
-        //     // for (int i = 0; i < bytesPerNode; ++i)
-        //     // {
-        //     //     current_bytes[current_Y + i];
-        //     // }
+            std::vector<bool> neighbors(nextPartitionIndex - partitionIndex, 0);
+            neighbors[xIndex - partitionIndex] = 1;
 
-        //     // for (int xI = partitionIndex; xI < nextPartitionIndex; ++xI)
-        //     // {
-        //     //     uint32_t bytesChecked = 0;
-        //     //     while (bytesChecked != bytesPerNode)
-        //     //     {
+            std::cerr << "xI ";
+            uint32_t bytesChecked = 0;
+            while(bytesChecked != bytesPerNode)
+            {
+                const uint8_t maskByteOfCurrent = b2RAM[currentByteIndex + bytesChecked];
 
-        //     //         ++bytesChecked;
-        //     //     }
+                for(uint32_t xI = partitionIndex; xI < nextPartitionIndex; ++xI)
+                {
+                    if(!neighbors[xI - partitionIndex])
+                    {
+                        std::cerr << xI << " ";
 
-        //     //     // If not the same node
-        //     //     if(xIndex != xI)
-        //     //     {
+                        const uint8_t maskBytePossibleNeighbor = b2RAM[xI + bytesChecked];
 
-        //     //     }
-        //     // }
-        // }
+                        if(maskByteOfCurrent & maskBytePossibleNeighbor)
+                        {
+                            neighbors[xI - partitionIndex] = 1;
+
+                            const uint64_t xNeighbor = x_wm[xI];
+
+                            graph[current_node].insert(xNeighbor);
+                            graph[xNeighbor].insert(current_node);
+                        }
+                    }
+                }
+
+                ++bytesChecked;
+            }
+
+            // for (int xI = partitionIndex; xI < nextPartitionIndex; ++xI)
+            // {
+            //     // If not the same node
+            //     if(xIndex != xI)
+            //     {
+            //         std::cerr << xI << " ";
+
+            //         uint32_t bytesChecked = 0;
+            //         while (bytesChecked != bytesPerNode)
+            //         {
+            //             uint8_t maskByteOfCurrent = b2RAM[currentByteIndex + bytesChecked];
+
+            //             ++bytesChecked;
+            //         }
+            //     }
+            // }
+        }
 
         std::cerr << std::endl;
     }
@@ -201,10 +226,11 @@ int main(int argc, char const *argv[])
     // Read compressed sequences
     readCompressed(path, x_wm, b1_rrr, b2_wt, y_wm);
 
+    std::map<uint32_t, std::set<uint32_t>> graph;
 
     for(uint8_t i = 1; i <= iterations; ++i)
     {
-        std::map<uint32_t, std::set<uint32_t>> graph;
+        graph.clear();        
 
         std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
 
@@ -216,6 +242,17 @@ int main(int argc, char const *argv[])
 
         std::cerr << "Time Reconstruction " << i << ": " << duration << std::endl;
     }
+
+    for(const auto & pair : graph)
+    {
+        std::cout << pair.first << ": ";
+        for(const auto & node : pair.second)
+        {
+            std::cout << node << ", ";
+        }
+        std::cout << std::endl;
+    }
+
 
 
     return 0;
