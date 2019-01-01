@@ -25,6 +25,7 @@ uint32_t compressInt(std::string filename) {
 
     const uint32_t bitSize = size_in_bytes(wm_int)*8;
     std::cout << bitSize << " bits" << std::endl;
+
     return bitSize;
 }
 
@@ -42,13 +43,15 @@ uint32_t compressByte(std::string filename, std::string type) {
     // store_to_file(wt_huff, filename + "-wt_huff.sdsl");
     std::cout << filename << " size ";
 
+    uint32_t bitSize = 0;
+
     if("hutu" == type)
     {
         sdsl::wt_hutu<sdsl::rrr_vector<63>> wt_hutu;
         sdsl::construct(wt_hutu, filename.c_str(), 1);
         store_to_file(wt_hutu, filename + "-wt_hutu.sdsl");
 
-        const uint32_t bitSize = size_in_bytes(wt_hutu)*8;
+        bitSize = size_in_bytes(wt_hutu)*8;
         std::cout << bitSize << " bits" << std::endl;
     }
     else if("huff" == type)
@@ -57,7 +60,7 @@ uint32_t compressByte(std::string filename, std::string type) {
         sdsl::construct(wt_huff, filename.c_str(), 1);
         store_to_file(wt_huff, filename + "-wt_huff.sdsl");
 
-        const uint32_t bitSize = size_in_bytes(wt_huff)*8;
+        bitSize = size_in_bytes(wt_huff)*8;
         std::cout << bitSize << " bits" << std::endl;
     }
     else if("blcd" == type)
@@ -66,7 +69,7 @@ uint32_t compressByte(std::string filename, std::string type) {
         sdsl::construct(wt_blcd, filename.c_str(), 1);
         store_to_file(wt_blcd, filename + "-wt_blcd.sdsl");
 
-        const uint32_t bitSize = size_in_bytes(wt_blcd)*8;
+        bitSize = size_in_bytes(wt_blcd)*8;
         std::cout << bitSize << " bits" << std::endl;
     }
     else
@@ -113,12 +116,14 @@ uint32_t compressBitmap(std::string filename, std::string type) {
 
     std::cout << filename << " size ";
 
+    uint32_t bitSize = 0;
+
     if("rrr" == type)
     {
         sdsl::rrr_vector<63> rrrb(B);
         store_to_file(rrrb, filename + "-rrr-64.sdsl");
 
-        const uint32_t bitSize = size_in_bytes(rrrb)*8;
+        bitSize = size_in_bytes(rrrb)*8;
         std::cout << bitSize << " bits" << std::endl;
     }
     else if("sdb" == type)
@@ -126,7 +131,7 @@ uint32_t compressBitmap(std::string filename, std::string type) {
         sdsl::sd_vector<> sdb(B);
         store_to_file(sdb, filename + "-sdb.sdsl");
 
-        const uint32_t bitSize = size_in_bytes(sdb)*8;
+        bitSize = size_in_bytes(sdb)*8;
         std::cout << bitSize << " bits" << std::endl;
     }
     else
@@ -181,7 +186,7 @@ int main(int argc, char const *argv[])
     totalSizeY += compressBitmap(sB1, b1Type);
     // std::cout << "B1 Done" << std::endl;
 
-    totalSizeY += compressByte(sB2bin. b2Type);
+    totalSizeY += compressByte(sB2bin, b2Type);
     // std::cout << "B2 Done" << std::endl;
 
     //totalSizeB3 = totalSizeY;

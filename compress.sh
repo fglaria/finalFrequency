@@ -1,15 +1,15 @@
 #! /bin/bash
 # set -x
 
-while getopts "i:b1:b2:c" option; do
+while getopts "i:1:2:c" option; do
     case $option in
         i)
             route=$OPTARG
             ;;
-        b1)
+        1)
             b1Type=$OPTARG
             ;;
-        b2)
+        2)
             b2Type=$OPTARG
             ;;
         c)
@@ -18,8 +18,13 @@ while getopts "i:b1:b2:c" option; do
     esac
 done
 
-if [[ $route ]] && [[ $b1Type ]] && [[ $b2Type ]]; then
-    ./compress $route $b1Type $b2Type > $route.log 2> $route.error
+if [ -z "$route" ]; then
+    echo "No path to files"
+elif [ -z "$b1Type" ]; then
+    echo "No type to compress B1"
+elif [ -z "$b2Type" ]; then
+    echo "No type to compress B2"
 else
-    echo "No path to file to compress"
+    # ./compress $route $b1Type $b2Type > $route.log 2> $route.error
+    ./compress $route $b1Type $b2Type
 fi
