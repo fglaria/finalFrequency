@@ -32,7 +32,7 @@ There are some additional files for testing. Shouldn't be deleted.
 ### compress.sh
 This script receives with *-i* option a route to directory where the output of *frequency* are, using their base common name.
 
-Compressing options for **B1** is -1 (rrr|sdb), and for **B2** is -2 (hutu|huff|blcd), wich define what kind of structure to use for compression.
+Compressing options for **B1** is -1 (rrr|sdb), and for **B2** is -2 (hutu|huff|blcd), wich define what kind of structure to use for compression (for testing, only *-1 rrr -2 hutu* are developed).
 
 As last option, it can be called with *-c* to compile it's corresponding *.cpp* file.
 **If it hasn't been called before, you should include this option.**
