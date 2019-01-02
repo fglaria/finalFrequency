@@ -21,9 +21,9 @@ done
 if [ -z "$route" ]; then
     echo "No path to files"
 elif [ -z "$b1Type" ]; then
-    echo "No type to compress B1"
+    echo "No type to compress B1 (rrr|sdb)"
 elif [ -z "$b2Type" ]; then
-    echo "No type to compress B2"
+    echo "No type to compress B2 (hutu|huff|blcd)"
 else
     # ./compress $route $b1Type $b2Type > $route.log 2> $route.error
     ./compress $route $b1Type $b2Type

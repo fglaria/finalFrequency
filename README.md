@@ -30,11 +30,25 @@ Each of these have their own binary file.
 There are some additional files for testing. Shouldn't be deleted.
 
 ### compress.sh
-This script receives with *-i* option a route to directory where the output of *frequency* are, including their base common name.
+This script receives with *-i* option a route to directory where the output of *frequency* are, using their base common name.
 
-Compressing options for **B1** and **B2** options are -b1 (rrr|sdb) or -b2 (hutu|huff|blcd), wich define what kind of structure to use for compression.
+Compressing options for **B1** is -1 (rrr|sdb), and for **B2** is -2 (hutu|huff|blcd), wich define what kind of structure to use for compression.
 
 As last option, it can be called with *-c* to compile it's corresponding *.cpp* file.
 **If it hasn't been called before, you should include this option.**
 
 The output of this script are new created compressed files, using [Simon Gog's SDSL (Succinct Data Structure Library)](https://github.com/simongog/sdsl-lite).
+
+
+## Testing
+
+### times.sh
+To test how fast the graph can be reconstructed, listing nodes in order or at random, this is script is used.
+
+This script receives with *-i* option a route to directory where the output of *compress* are, using their base common name.
+
+With option *-n* indicates how many nodes the graph contains. Option *-r* specifies if graph is reconstructed in order or at random.
+
+As last option, it can be called with *-c* to compile it's corresponding *.cpp* file.
+**If it hasn't been called before, you should include this option.**
+

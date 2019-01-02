@@ -45,28 +45,28 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
 
     for (uint32_t xCount = 1; xCount <= howManyX; ++xCount)
     {
-        std::cerr << "N" << current_node << " ";
+        // std::cerr << "N" << current_node << " ";
 
         const uint64_t xIndex = x_wm.select(xCount, current_node);
-        std::cerr << "nI" << xIndex << " ";
+        // std::cerr << "nI" << xIndex << " ";
 
         uint64_t partitionNumber = b1_rank(xIndex + 1) - 1;
-        std::cerr << "pN " << partitionNumber << " ";
+        // std::cerr << "pN " << partitionNumber << " ";
 
         const uint64_t partitionIndex = b1_select(partitionNumber + 1);
-        std::cerr <<  "pI " << partitionIndex << " ";
+        // std::cerr <<  "pI " << partitionIndex << " ";
 
         const uint64_t nextPartitionIndex = b1_select(partitionNumber + 2);
-        std::cerr <<  "nPI " << nextPartitionIndex << " ";
+        // std::cerr <<  "nPI " << nextPartitionIndex << " ";
 
         const uint32_t howManyNodesInPartition = nextPartitionIndex - partitionIndex;
-        std::cerr <<  "hMB " << howManyNodesInPartition << " ";
+        // std::cerr <<  "hMB " << howManyNodesInPartition << " ";
 
         const uint32_t current_Y = yRAM[partitionNumber];
-        std::cerr <<  "cY " << current_Y << " ";
+        // std::cerr <<  "cY " << current_Y << " ";
 
         const uint32_t bytesPerNode = (yRAM[partitionNumber + 1] - current_Y)/howManyNodesInPartition;
-        std::cerr << "bpn " << bytesPerNode << " ";
+        // std::cerr << "bpn " << bytesPerNode << " ";
 
         // If no bytes per node, all nodes are adjacent
         if(0 == bytesPerNode)
@@ -85,12 +85,12 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
         else
         {
             const uint64_t currentByteIndex = current_Y + bytesPerNode * (xIndex - partitionIndex);
-            std::cerr << "cBi " << currentByteIndex << " ";
+            // std::cerr << "cBi " << currentByteIndex << " ";
 
             std::vector<bool> neighbors(nextPartitionIndex - partitionIndex, 0);
             neighbors[xIndex - partitionIndex] = 1;
 
-            std::cerr << "xI ";
+            // std::cerr << "xI ";
             uint32_t bytesChecked = 0;
             while(bytesChecked != bytesPerNode)
             {
@@ -100,7 +100,7 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
                 {
                     if(!neighbors[xI - partitionIndex])
                     {
-                        std::cerr << xI << " ";
+                        // std::cerr << xI << " ";
 
                         const uint8_t maskBytePossibleNeighbor = b2RAM[xI + bytesChecked];
 
@@ -137,7 +137,7 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
             // }
         }
 
-        std::cerr << std::endl;
+        // std::cerr << std::endl;
     }
     // std::cerr << std::endl;
 
@@ -163,7 +163,6 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
     for(uint64_t i = 0; i < y_wm.size(); ++i)
     {
         yRAM[i] = y_wm[i];
-        std::cerr << yRAM[i] << " ";
     }
     std::cerr << std::endl;
 
