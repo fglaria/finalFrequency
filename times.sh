@@ -24,10 +24,10 @@ elif [ -z "$nodes" ]; then
     echo "No number of nodes"
 elif [ -z "$random" ]; then
     echo "No random specified"
-elif [ -z "$b1Type" ]; then
-    echo "No type specified for B1 (rrr|sdb)"
-elif [ -z "$b2Type" ]; then
-    echo "No type specified for B2 (hutu|huff|blcd)"
+# elif [ -z "$b1Type" ]; then
+#     echo "No type specified for B1 (rrr|sdb)"
+# elif [ -z "$b2Type" ]; then
+#     echo "No type specified for B2 (hutu|huff|blcd)"
 else
     # ./times $route $nodes $random > $route.log 2> $route.error
     ./times $route $nodes $random 

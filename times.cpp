@@ -242,12 +242,13 @@ int main(int argc, char const *argv[])
         std::cerr << "Time Reconstruction " << i << ": " << duration << std::endl;
     }
 
+    std::cout << graph.size() << std::endl;
     for(const auto & pair : graph)
     {
-        std::cout << pair.first << ": ";
+        // std::cout << pair.first << ": ";
         for(const auto & node : pair.second)
         {
-            std::cout << node << ", ";
+            std::cout << node << " ";
         }
         std::cout << std::endl;
     }
