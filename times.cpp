@@ -102,7 +102,9 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
                     {
                         // std::cerr << xI << " ";
 
-                        const uint8_t maskBytePossibleNeighbor = b2RAM[xI + bytesChecked];
+                        const uint32_t b2xIbyteIndex = current_Y + bytesPerNode * (xI - partitionIndex);
+
+                        const uint8_t maskBytePossibleNeighbor = b2RAM[b2xIbyteIndex];
 
                         if(maskByteOfCurrent & maskBytePossibleNeighbor)
                         {
@@ -229,7 +231,7 @@ int main(int argc, char const *argv[])
 
     for(uint8_t i = 1; i <= iterations; ++i)
     {
-        graph.clear();        
+        graph.clear();
 
         std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
 
