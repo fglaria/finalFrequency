@@ -103,8 +103,9 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
                         // std::cerr << xI << " ";
 
                         const uint32_t b2xIbyteIndex = current_Y + bytesPerNode * (xI - partitionIndex);
+			// std::cerr << " " << b2xIbyteIndex
 
-                        const uint8_t maskBytePossibleNeighbor = b2RAM[b2xIbyteIndex];
+                        const uint8_t maskBytePossibleNeighbor = b2RAM[b2xIbyteIndex + bytesChecked];
 
                         if(maskByteOfCurrent & maskBytePossibleNeighbor)
                         {
