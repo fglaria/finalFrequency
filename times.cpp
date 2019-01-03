@@ -246,13 +246,22 @@ int main(int argc, char const *argv[])
     }
 
     std::cout << graph.size() << std::endl;
+    uint64_t nodeIndex = 0;
     for(const auto & pair : graph)
     {
         // std::cout << pair.first << ": ";
-        for(const auto & node : pair.second)
+	while(pair.first != nodeIndex)
+        {
+            std::cout << std::endl;
+	    ++nodeIndex;
+	}
+	
+	for(const auto & node : pair.second)
         {
             std::cout << node << " ";
         }
+
+        ++nodeIndex;
         std::cout << std::endl;
     }
 
