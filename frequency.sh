@@ -12,8 +12,8 @@ while getopts "i:c" option; do
     esac
 done
 
-if [[ $route ]]; then
-    ./frequency $route > $route.log 2> $route.error
-else
-    echo "No path to cliques file"
+if [ -z $route ]; then
+    echo "No path to clique file"
+else    
+    ./frequency $route
 fi
