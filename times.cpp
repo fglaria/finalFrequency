@@ -242,7 +242,7 @@ int main(int argc, char const *argv[])
 
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop_time - start_time).count();
 
-        std::cerr << "Time Reconstruction " << i << ": " << duration << std::endl;
+        std::cerr << "Time Reconstruction " << i << ": " << duration << " [ms]" << std::endl;
     }
 
     std::cout << graph.size() << std::endl;
