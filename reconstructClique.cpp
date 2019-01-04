@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 
 
     // Open cliques file & create cliques vector
-    fileStream.open(cliqueFile.c_str(), std::ios::in);
+    fileStream.open(basePath.c_str(), std::ios::in);
 
     if(fileStream.is_open())
     {
@@ -43,9 +43,9 @@ int main(int argc, char* argv[])
 
             // Put every node on clique on graph
             std::set<uint64_t>::const_iterator itNode1, itNode2;
-            for(itNode1 = clique.begin(); itNode1 != clique.end() - 1; ++itNode1)
+            for(itNode1 = clique.begin(); itNode1 != std::prev(clique.end()); ++itNode1)
             {
-                for(itNode2 = clique.begin() + 1; itNode2 != clique.end(); ++itNode2)
+                for(itNode2 = std::next(clique.begin()); itNode2 != clique.end(); ++itNode2)
                 {
                     graph[*itNode1].insert(*itNode2);
                     graph[*itNode2].insert(*itNode1);
@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
 
     // Output graph
     std::cout << graph.size() << std::endl;
+    uint64_t nodeIndex = 0;
     for(const auto & pair : graph)
     {
         // std::cout << pair.first << ": ";
