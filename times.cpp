@@ -250,13 +250,13 @@ int main(int argc, char const *argv[])
     for(const auto & pair : graph)
     {
         // std::cout << pair.first << ": ";
-	while(pair.first != nodeIndex)
+    	while(pair.first != nodeIndex)
         {
             std::cout << std::endl;
-	    ++nodeIndex;
-	}
-	
-	for(const auto & node : pair.second)
+    	    ++nodeIndex;
+    	}
+
+    	for(const auto & node : pair.second)
         {
             std::cout << node << " ";
         }
