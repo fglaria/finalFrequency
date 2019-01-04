@@ -1,0 +1,36 @@
+X:  Secuencia de nodos en particiones
+B1: Bitmap con misma cantidad de elementos que X, indicando con 1 dónde empiezan las particiones
+B2: Bitmaps separados en bytes de cliques dónde participa un nodo (1 participa, 0 no)
+Y:  Secuencia de enteros indicando índices de B2 donde comienzan las particiones correspondientes.
+
+¿Cómo obtener vecinos de nodo Xi?
+1.- Contar cuántas ocurrencias de Xi hay en X (Ni)
+2.- Por cada ocurrencia, obtener el índice en X (iXi)
+3.- Contar en B1 cuántos 1 hay hasta el índice iXi, es decir, el número de partición (Np)
+4.- Obtener los índices de inicio de la partición Np (iNp0) y de la siguiente (iNp+1)
+5.- Obtener cuántos nodos hay en la partición (Nx = iNp+1 - iNp0)
+6.- Obtener el índice de B2 guardado en Y correspondiente a esa partición (iB2 = Y[Np])
+7.- Calcular cuántos bytes corresponden a un bitmap para cada nodo de esa partición (bpN = (Y[Np + 1] - iB2) / Nx)
+
+8.- Si bpN = 0, no hay bytes asociados a nodos, quiere decir que partición es un solo clique, todos son vecinos
+    8.1- Si bpN != 0, hay que comparar bytes
+
+9.-     Obtener el índice del primer byte asociado a Xi (iBx = iB2 + bpN * (iXi - iNp0))
+10.-    Llevar la cuenta de qué byte de los posibles bpN se está comparando (bC)
+11.-    Obtener el byte de Xi a comparar con bytes de posibles vecinos (bXi = B2[iBx + bC])
+
+12.-    Revisar por índices de la partición, desde iNp0 hasta iNp+1, los posibles vecinos de Xi (iXv)
+13.-    Si posible vecino ya es vecino, omitir.
+    13.1.- Si no es vecino, comparar bytes
+
+14.-    Obtener el ìndice del byte a comparar del posible vecino (iBv = iB2 + bpN * (iXv - iNp0))
+15.-    Obtenet el byte a comparar del posible vecino (bXv = B2[iBv + bC])
+16.-    Calcular si son vecinos (v = bXi & bXv)
+17.-    Si son vecinos, marcarlos como tal y agregarlos a listado de adyacencia de ambos (Xi, Xv)
+    17.1.- Si no son vecinos, queda pendiente comparar siguientes bytes en nueva iteración
+
+18.-    Luego de revisar todos los bytes (bC) asociados a cada posible vecino (Xv), actualizar cuenta (bC += 1)
+19.-    Si quedan bytes por revisar, volver a 12
+    19.1.- Si no quedan bytes por revisar, terminar búsqueda para iXi en partición, pasar a siguiente iXi+1, y volver a 2
+
+20.- Seguir hasta revisar todas las ocurrencias Ni de Xi
