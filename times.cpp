@@ -36,16 +36,16 @@ void readCompressed(const std::string path, sdsl::wm_int<sdsl::rrr_vector<63>> &
 }
 
 
-void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
+void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm, std::vector<uint32_t> &xRAM,
     sdsl::rrr_vector<63>::rank_1_type &b1_rank, sdsl::rrr_vector<63>::select_1_type &b1_select,
     std::vector<uint8_t> &b2RAM, std::vector<uint32_t> &yRAM,
-    std::map<uint32_t, std::set<uint32_t>> &graph, uint64_t current_node)
+    std::map<uint32_t, std::set<uint32_t>> &graph, uint64_t &current_node)
 {
     const uint32_t howManyX = x_wm.rank(x_wm.size(), current_node);
 
     for (uint32_t xCount = 1; xCount <= howManyX; ++xCount)
     {
-        // std::cerr << "N" << current_node << " ";
+        // std::cerr << current_node << " " << howManyX << "; ";
 
         const uint64_t xIndex = x_wm.select(xCount, current_node);
         // std::cerr << "nI" << xIndex << " ";
@@ -75,7 +75,7 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
             {
                 if(xIndex != xI)
                 {
-                    const uint64_t adjacentNode = x_wm[xI];
+                    const uint32_t adjacentNode = xRAM[xI];
 
                     graph[current_node].insert(adjacentNode);
                     graph[adjacentNode].insert(current_node);
@@ -111,10 +111,10 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
                         {
                             neighbors[xI - partitionIndex] = 1;
 
-                            const uint64_t xNeighbor = x_wm[xI];
+                            const uint32_t xNeighbor = xRAM[xI];
 
                             graph[current_node].insert(xNeighbor);
-                            graph[xNeighbor].insert(current_node);
+                            //graph[xNeighbor].insert(current_node);
                         }
                     }
                 }
@@ -122,22 +122,6 @@ void getNodeNeighbors(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
                 ++bytesChecked;
             }
 
-            // for (int xI = partitionIndex; xI < nextPartitionIndex; ++xI)
-            // {
-            //     // If not the same node
-            //     if(xIndex != xI)
-            //     {
-            //         std::cerr << xI << " ";
-
-            //         uint32_t bytesChecked = 0;
-            //         while (bytesChecked != bytesPerNode)
-            //         {
-            //             uint8_t maskByteOfCurrent = b2RAM[currentByteIndex + bytesChecked];
-
-            //             ++bytesChecked;
-            //         }
-            //     }
-            // }
         }
 
         // std::cerr << std::endl;
@@ -153,6 +137,12 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
     sdsl::wm_int<sdsl::rrr_vector<63>> &y_wm, std::map<uint32_t, std::set<uint32_t>> &graph,
     uint64_t &totalNodes, uint8_t &random)
 {
+    std::vector<uint32_t> xRAM(x_wm.size(), 0);
+    for(uint64_t i = 0; i < x_wm.size(); ++i)
+    {
+        xRAM[i] = x_wm[i];
+    }
+    
     sdsl::rrr_vector<63>::rank_1_type b1_rank(&b1_rrr);
     sdsl::rrr_vector<63>::select_1_type b1_select(&b1_rrr);
 
@@ -186,7 +176,7 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
 
             nodesDone[random_node] = 1;
 
-            getNodeNeighbors(x_wm, b1_rank, b1_select, b2RAM, yRAM, graph, random_node);
+            getNodeNeighbors(x_wm, xRAM, b1_rank, b1_select, b2RAM, yRAM, graph, random_node);
 
             ++doneNodesCount;
         }
@@ -195,7 +185,7 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
     {
         for (uint64_t ordered_node = 0; ordered_node < totalNodes; ++ordered_node)
         {
-            getNodeNeighbors(x_wm, b1_rank, b1_select, b2RAM, yRAM, graph, ordered_node);
+            getNodeNeighbors(x_wm, xRAM, b1_rank, b1_select, b2RAM, yRAM, graph, ordered_node);
         }
     }
 
