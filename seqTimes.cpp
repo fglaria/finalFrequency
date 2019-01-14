@@ -38,18 +38,12 @@ void readCompressed(const std::string path, sdsl::wm_int<sdsl::rrr_vector<63>> &
 
 void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
     sdsl::rrr_vector<63> &b1_rrr, sdsl::wt_hutu<sdsl::rrr_vector<63>> &b2_wt,
-    sdsl::wm_int<sdsl::rrr_vector<63>> &y_wm, std::map<uint32_t, std::set<uint32_t>> &graph,
-    uint64_t &totalNodes, uint8_t &random)
+    sdsl::wm_int<sdsl::rrr_vector<63>> &y_wm, std::map<uint32_t, std::set<uint32_t>> &graph)
 {
     // SDSL variables for B1
-    sdsl::rrr_vector<63>::rank_1_type rrrB1_rank(&rrrB1);
-    sdsl::rrr_vector<63>::select_1_type rrrB1_sel(&rrrB1);
+    sdsl::rrr_vector<63>::rank_1_type rrrB1_rank(&b1_rrr);
+    sdsl::rrr_vector<63>::select_1_type b1_select(&b1_rrr);
 
-    std::vector<uint8_t> b2RAM(b2_wt.size(), 0);
-    for(uint64_t i = 0; i < b2_wt.size(); ++i)
-    {
-        b2RAM[i] = b2_wt[i];
-    }
 
     std::vector<uint32_t> xRAM(x_wm.size(), 0);
     for(uint64_t i = 0; i < x_wm.size(); ++i)
@@ -57,15 +51,27 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
         xRAM[i] = x_wm[i];
     }
 
-    // How many partitions for this graph
-    const uint32_t howManyPartitions = rrrB1_rank(rrrB1.size());
+    std::vector<uint8_t> b2RAM(b2_wt.size(), 0);
+    for(uint64_t i = 0; i < b2_wt.size(); ++i)
+    {
+        b2RAM[i] = b2_wt[i];
+    }
 
-    uint32_t currentY = 0, nextY = 0;
+    std::vector<uint32_t> yRAM(y_wm.size(), 0);
+    for(uint64_t i = 0; i < y_wm.size(); ++i)
+    {
+        yRAM[i] = y_wm[i];
+    }
+
+    // How many partitions for this graph
+    const uint32_t howManyPartitions = rrrB1_rank(b1_rrr.size());
+
+    uint32_t currentY = 0, nextY = yRAM[0];
 
 
 
     // For every partition, let's find neighbors
-    for (uint32_t partition = 0; partition < howManyPartitions; ++partition)
+    for (uint32_t partitionNumber = 0; partitionNumber < howManyPartitions; ++partitionNumber)
     {
         const uint64_t partitionIndex = b1_select(partitionNumber + 1);
         const uint64_t nextPartitionIndex = b1_select(partitionNumber + 2);
@@ -73,46 +79,104 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
         const uint32_t howManyNodesInPartition = nextPartitionIndex - partitionIndex;
 
         currentY = nextY;
-        nextY = y_wm[partition];
+        nextY = yRAM[partitionNumber + 1];
 
-        const uint32_t bytesPerNode = (nextY - current_Y)/howManyNodesInPartition;
+        const uint32_t bytesPerNode = (nextY - currentY)/howManyNodesInPartition;
 
 
         if(0 == bytesPerNode)
         {
-            for (uint64_t xI = partitionIndex; xI < nextPartitionIndex; ++xI)
+            for(uint64_t xCurrentIndex = partitionIndex; xCurrentIndex < nextPartitionIndex; ++xCurrentIndex)
             {
-                if(xIndex != xI)
-                {
-                    const uint32_t adjacentNode = xRAM[xI];
+                const uint32_t current_node = xRAM[xCurrentIndex];
 
-                    graph[current_node].insert(adjacentNode);
-                    graph[adjacentNode].insert(current_node);
+                for (uint64_t xAdjacentIndex = xCurrentIndex + 1; xAdjacentIndex < nextPartitionIndex; ++xAdjacentIndex)
+                {
+                    const uint32_t adjacent_node = xRAM[xAdjacentIndex];
+
+                    graph[current_node].insert(adjacent_node);
+                    graph[adjacent_node].insert(current_node);
                 }
             }
         }
         else
         {
-            
+            // For each current x, search it's neighbors
+            for(uint64_t xCurrentIndex = partitionIndex; xCurrentIndex < nextPartitionIndex; ++xCurrentIndex)
+            {
+                const uint32_t current_node = xRAM[xCurrentIndex];
+
+                // Get index of first byte of current node
+                const uint64_t currentByteIndex = currentY + bytesPerNode * (xCurrentIndex - partitionIndex);
+                // std::cerr << "cBi " << currentByteIndex << " ";
+
+                // Create a bool vector to check if nodes are already neighbors
+                const uint32_t howManyPossibleNeighbors = (nextPartitionIndex - xCurrentIndex) - 1;
+                std::vector<bool> neighbors(howManyPossibleNeighbors, 0);
+
+                // Check all bytes of nodes
+                uint32_t bytesChecked = 0;
+                while(bytesChecked != bytesPerNode)
+                {
+                    // Get byte of current node to check for neighbors
+                    const uint8_t maskByteOfCurrent = b2RAM[currentByteIndex + bytesChecked];
+
+                    // For every possible neighbor, get their idexes
+                    for(uint64_t xNeighborIndex = xCurrentIndex + 1; xNeighborIndex < nextPartitionIndex; ++xNeighborIndex)
+                    {
+                        // std::cerr << "xNeighborIndex ";
+
+                        // Get index in vector of bools, to check if already neighbors
+                        const uint32_t xNeighborBoolIndex = (xNeighborIndex - xCurrentIndex) - 1;
+
+                        // If not neighbors yet
+                        if(!neighbors[xNeighborBoolIndex])
+                        {
+                            // std::cerr << xNeighborIndex << " ";
+
+                            // Get index of possible neighbor's byte to check
+                            const uint64_t neighborByteIndex = currentY + bytesPerNode * (xNeighborIndex - partitionIndex) + bytesChecked;
+                            // std::cerr << " " << neighborByteIndex
+
+                            // Get byte of possible neighbor to check
+                            const uint8_t maskBytePossibleNeighbor = b2RAM[neighborByteIndex];
+
+                            // If not zero, they are neighbors!
+                            if(maskByteOfCurrent & maskBytePossibleNeighbor)
+                            {
+                                // Mark as neighbors in vector of bools
+                                neighbors[xNeighborBoolIndex] = 1;
+
+                                const uint32_t adjacent_node = xRAM[xNeighborIndex];
+
+                                graph[current_node].insert(adjacent_node);
+                                graph[adjacent_node].insert(current_node);
+                            }
+                        }
+                    }
+
+                    ++bytesChecked;
+                }
+            }
         }
     }
 
     return;
-} 
+}
 
-int maint(int argc, char const *argv[])
+int main(int argc, char const *argv[])
 {
-    if(4 > argc)
+    if(2 > argc)
     {
-        std::cerr << "Modo de uso: " << argv[0] << " RUTA_BASE NODES (0:ORDERNADO/1:ALEATORIO)" << std::endl;
+        std::cerr << "Modo de uso: " << argv[0] << " RUTA_BASE" << std::endl;
         return -1;
     }
 
     const std::string path(argv[1]);
-    uint64_t totalNodes = atoi(argv[2]);
-    uint8_t random = atoi(argv[3]);
+    //uint64_t totalNodes = atoi(argv[2]);
+    //uint8_t random = atoi(argv[3]);
 
-    const uint8_t iterations = argv[4] ? atoi(argv[4]) : 1;
+    const uint8_t iterations = argv[2] ? atoi(argv[2]) : 1;
 
     // Variables to read compressed sequences
     sdsl::wm_int<sdsl::rrr_vector<63>> x_wm;
@@ -131,7 +195,7 @@ int maint(int argc, char const *argv[])
 
         std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
 
-        reconstructGraph(x_wm, b1_rrr, b2_wt, y_wm, graph, totalNodes, random);
+        reconstructGraph(x_wm, b1_rrr, b2_wt, y_wm, graph);
 
         std::chrono::high_resolution_clock::time_point stop_time = std::chrono::high_resolution_clock::now();
 

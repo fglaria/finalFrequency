@@ -2,6 +2,7 @@ frequency
 compress
 times
 reconstructClique
+seqTimes
 .DS_Store
 test/dblp/dblp-2011.cliques.*
 test/deci/deci.clique.*
