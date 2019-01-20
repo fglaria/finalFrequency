@@ -67,7 +67,7 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
     std::cerr << "All to RAM" << std::endl;
 
     // How many partitions for this graph
-    const uint32_t howManyPartitions = rrrB1_rank(b1_rrr.size());
+    const uint32_t howManyPartitions = rrrB1_rank(b1_rrr.size()) - 1;
 
     uint32_t currentY = 0, nextY = yRAM[0];
 
@@ -92,6 +92,7 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
         if(0 == bytesPerNode)
         {
             std::cerr << "bPN 0" << std::endl;
+
             for(uint64_t xCurrentIndex = partitionIndex; xCurrentIndex < nextPartitionIndex; ++xCurrentIndex)
             {
                 const uint32_t current_node = xRAM[xCurrentIndex];
@@ -108,6 +109,7 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
         else
         {
             std::cerr << "bPN " << bytesPerNode << std::endl;
+
             // For each current x, search it's neighbors
             for(uint64_t xCurrentIndex = partitionIndex; xCurrentIndex < nextPartitionIndex; ++xCurrentIndex)
             {
