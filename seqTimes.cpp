@@ -64,7 +64,7 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
     }
 
 
-    std::cerr << "All to RAM" << std::endl;
+    // std::cerr << "All to RAM" << std::endl;
 
     // How many partitions for this graph
     const uint32_t howManyPartitions = rrrB1_rank(b1_rrr.size()) - 1;
@@ -76,7 +76,7 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
     // For every partition, let's find neighbors
     for (uint32_t partitionNumber = 0; partitionNumber < howManyPartitions; ++partitionNumber)
     {
-        std::cerr << "Partition " << partitionNumber << std::endl;
+        // std::cerr << "Partition " << partitionNumber << std::endl;
 
         const uint64_t partitionIndex = b1_select(partitionNumber + 1);
         const uint64_t nextPartitionIndex = b1_select(partitionNumber + 2);
@@ -91,7 +91,7 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
 
         if(0 == bytesPerNode)
         {
-            std::cerr << "bPN 0" << std::endl;
+            // std::cerr << "bPN 0" << std::endl;
 
             for(uint64_t xCurrentIndex = partitionIndex; xCurrentIndex < nextPartitionIndex; ++xCurrentIndex)
             {
@@ -108,7 +108,7 @@ void reconstructGraph(sdsl::wm_int<sdsl::rrr_vector<63>> &x_wm,
         }
         else
         {
-            std::cerr << "bPN " << bytesPerNode << std::endl;
+            // std::cerr << "bPN " << bytesPerNode << std::endl;
 
             // For each current x, search it's neighbors
             for(uint64_t xCurrentIndex = partitionIndex; xCurrentIndex < nextPartitionIndex; ++xCurrentIndex)
